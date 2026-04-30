@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}{{ project.name }} – TaskFlow{% endblock %}
+{% block page_title %}{{ project.name }}{% endblock %}
+
+{% block header_actions %}
+{% if user_role == 'admin' or user.is_superuser %}
+<div class="flex items-center gap-2">
+  <a href="{% url 'tasks:create' project_id=project.pk %}" id="btn-add-task"
+     class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+    </svg>
+    Add Task
+  </a>
+  <a href="{% url 'projects:update' pk=project.pk %}" id="btn-edit-project"
+     class="bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm font-medium px-4 py-2 rounded-lg transition-all">
+    Edit
+  </a>
+  <a href="{% url 'projects:members' pk=project.pk %}" id="btn-manage-members"
+     class="bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm font-medium px-4 py-2 rounded-lg transition-all">
+    Members
+  </a>
+</div>
+{% else %}
+<a href="{% url 'tasks:create' project_id=project.pk %}" id="btn-add-task-member"
+   class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all">
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+  </svg>
+  Add Task
+</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+  <!-- Project Info -->
+  <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+    <div class="flex items-start justify-between flex-wrap gap-4">
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="badge {% if project.status == 'active' %}bg-green-900 text-green-300{% elif project.status == 'completed' %}bg-blue-900 text-blue-300{% else %}bg-gray-700 text-gray-400{% endif %}">
+            {{ project.get_status_display }}
+          </span>
+          {% if project.deadline %}
+          <span class="text-xs text-gray-400">Deadline: {{ project.deadline }}</span>
+          {% endif %}
+        </div>
+        <p class="text-gray-400 text-sm">{{ project.description|default:"No description." }}</p>
+      </div>
+      <div class="text-right">
+        <p class="text-3xl font-bold text-white">{{ progress }}%</p>
+        <p class="text-xs text-gray-500">complete</p>
+      </div>
+    </div>
+    <div class="mt-4">
+      <div class="w-full bg-gray-700 rounded-full h-2">
+        <div class="progress-bar h-2 rounded-full {% if progress == 100 %}bg-green-500{% else %}bg-indigo-500{% endif %}"
+             style="width: {{ progress }}%"></div>
+      </div>
+    </div>
+    <div class="mt-4 flex items-center gap-4 text-xs text-gray-500">
+      <span>Created by {{ project.created_by.get_full_name|default:project.created_by.username }}</span>
+      <span>{{ project.created_at|date:"M d, Y" }}</span>
+      <span>{{ members.count }} members</span>
+    </div>
+  </div>
+
+  <!-- Members Row -->
+  <div class="bg-gray-800 rounded-xl border border-gray-700 p-5">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="font-semibold text-white text-sm">Team Members</h3>
+      {% if user_role == 'admin' or user.is_superuser %}
+      <a href="{% url 'projects:members' pk=project.pk %}" class="text-xs text-indigo-400 hover:text-indigo-300">Manage →</a>
+      {% endif %}
+    </div>
+    <div class="flex flex-wrap gap-2">
+      {% for m in members %}
+      <div class="flex items-center gap-2 bg-gray-700 rounded-full px-3 py-1.5">
+        <div class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+          {{ m.user.username|first|upper }}
+        </div>
+        <span class="text-sm text-gray-200">{{ m.user.get_full_name|default:m.user.username }}</span>
+        <span class="badge {% if m.role == 'admin' %}bg-indigo-900 text-indigo-300{% else %}bg-gray-600 text-gray-400{% endif %}">{{ m.role }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Kanban Task Columns -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+
+    {% for group, tasks, color, icon in forloop.parentloop.0|default:"" %}{% endfor %}
+
+    <!-- Todo -->
+    <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-gray-500"></span>
+          <span class="text-sm font-semibold text-gray-300">To Do</span>
+        </div>
+        <span class="badge bg-gray-700 text-gray-400">{{ todo_tasks.count }}</span>
+      </div>
+      <div class="p-3 space-y-2 min-h-24">
+        {% for task in todo_tasks %}
+        {% include "tasks/_task_card.html" %}
+        {% empty %}
+        <p class="text-xs text-gray-600 text-center py-4">No tasks</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- In Progress -->
+    <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+          <span class="text-sm font-semibold text-gray-300">In Progress</span>
+        </div>
+        <span class="badge bg-blue-900 text-blue-300">{{ in_progress_tasks.count }}</span>
+      </div>
+      <div class="p-3 space-y-2 min-h-24">
+        {% for task in in_progress_tasks %}
+        {% include "tasks/_task_card.html" %}
+        {% empty %}
+        <p class="text-xs text-gray-600 text-center py-4">No tasks</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Completed -->
+    <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+          <span class="text-sm font-semibold text-gray-300">Completed</span>
+        </div>
+        <span class="badge bg-green-900 text-green-300">{{ completed_tasks.count }}</span>
+      </div>
+      <div class="p-3 space-y-2 min-h-24">
+        {% for task in completed_tasks %}
+        {% include "tasks/_task_card.html" %}
+        {% empty %}
+        <p class="text-xs text-gray-600 text-center py-4">No tasks</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Overdue -->
+    <div class="bg-gray-800 rounded-xl border border-red-900 overflow-hidden">
+      <div class="px-4 py-3 border-b border-red-900 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+          <span class="text-sm font-semibold text-red-300">Overdue</span>
+        </div>
+        <span class="badge bg-red-900 text-red-300">{{ overdue_tasks.count }}</span>
+      </div>
+      <div class="p-3 space-y-2 min-h-24">
+        {% for task in overdue_tasks %}
+        {% include "tasks/_task_card.html" %}
+        {% empty %}
+        <p class="text-xs text-gray-600 text-center py-4">None 🎉</p>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

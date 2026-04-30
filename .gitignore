@@ -1,0 +1,69 @@
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+*.so
+
+# ─── Virtual Environment ──────────────────────────────────────────────────────
+venv/
+env/
+ENV/
+.venv/
+.env.bak
+
+# ─── CRITICAL: Environment Variables (contains secrets & passwords) ────────────
+.env
+
+# ─── Django ───────────────────────────────────────────────────────────────────
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/*
+!/media/.gitkeep
+
+# ─── Django Migrations (keep these — they define your DB schema) ──────────────
+# apps/*/migrations/*.py  ← intentionally NOT ignored
+
+# ─── Distribution / Packaging ─────────────────────────────────────────────────
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+
+# ─── Testing ──────────────────────────────────────────────────────────────────
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+
+# ─── IDE / Editor ─────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Windows ──────────────────────────────────────────────────────────────────
+desktop.ini
+ehthumbs.db
+
+# ─── Node (if any frontend tooling added later) ───────────────────────────────
+node_modules/
+npm-debug.log*
+
+# ─── Collected static (generated at deploy time) ──────────────────────────────
+staticfiles/
+
+# ─── Old abandoned task_manager sub-project ───────────────────────────────────
+task_manager/

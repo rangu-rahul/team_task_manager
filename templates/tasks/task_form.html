@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} – TaskFlow{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto animate-fade-in">
+  <div class="mb-4">
+    <a href="{% url 'projects:detail' pk=project.pk %}" class="text-sm text-indigo-400 hover:text-indigo-300">
+      ← Back to {{ project.name }}
+    </a>
+  </div>
+  <div class="bg-gray-800 rounded-2xl border border-gray-700 p-8">
+    <form method="post" id="task-form" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="mb-5">
+        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-1.5">
+          {{ field.label }}
+        </label>
+        {{ field }}
+        {% if field.help_text %}
+        <p class="mt-1 text-xs text-gray-500">{{ field.help_text }}</p>
+        {% endif %}
+        {% if field.errors %}
+        <p class="mt-1 text-xs text-red-400">{{ field.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+      <div class="flex gap-3 pt-2">
+        <button type="submit" id="btn-save-task"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-all">
+          {% if task %}Update Task{% else %}Create Task{% endif %}
+        </button>
+        {% if task %}
+        <a href="{% url 'tasks:detail' task_id=task.pk %}"
+           class="bg-gray-700 hover:bg-gray-600 text-gray-300 font-semibold py-2.5 px-6 rounded-lg transition-all">
+          Cancel
+        </a>
+        {% else %}
+        <a href="{% url 'projects:detail' pk=project.pk %}"
+           class="bg-gray-700 hover:bg-gray-600 text-gray-300 font-semibold py-2.5 px-6 rounded-lg transition-all">
+          Cancel
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}My Projects – TaskFlow{% endblock %}
+{% block page_title %}Projects{% endblock %}
+
+{% block header_actions %}
+{% if user_role == 'admin' or user.is_superuser %}
+<a href="{% url 'projects:create' %}" id="btn-create-project"
+   class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all">
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+  </svg>
+  New Project
+</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+  {% if projects %}
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+    {% for project in projects %}
+    <div class="card-hover bg-gray-800 rounded-xl border border-gray-700 overflow-hidden flex flex-col">
+      <!-- Header -->
+      <div class="px-6 pt-6 pb-4">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <h3 class="font-semibold text-white text-lg leading-tight">
+            <a href="{% url 'projects:detail' pk=project.pk %}" class="hover:text-indigo-300 transition-colors">
+              {{ project.name }}
+            </a>
+          </h3>
+          <span class="badge flex-shrink-0
+            {% if project.status == 'active' %}bg-green-900 text-green-300
+            {% elif project.status == 'completed' %}bg-blue-900 text-blue-300
+            {% else %}bg-gray-700 text-gray-400{% endif %}">
+            {{ project.get_status_display }}
+          </span>
+        </div>
+        <p class="text-sm text-gray-400 line-clamp-2">{{ project.description|default:"No description provided." }}</p>
+      </div>
+
+      <!-- Progress -->
+      <div class="px-6 pb-4">
+        <div class="flex justify-between text-xs text-gray-500 mb-1.5">
+          <span>Progress</span>
+          <span>{{ project.get_progress }}%</span>
+        </div>
+        <div class="w-full bg-gray-700 rounded-full h-1.5">
+          <div class="progress-bar h-1.5 rounded-full
+            {% if project.get_progress == 100 %}bg-green-500{% else %}bg-indigo-500{% endif %}"
+               style="width: {{ project.get_progress }}%"></div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-3 bg-gray-750 border-t border-gray-700 flex items-center justify-between mt-auto">
+        <div class="flex items-center gap-3 text-xs text-gray-500">
+          <span class="flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" />
+            </svg>
+            {{ project.member_count }} members
+          </span>
+          <span class="flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+            </svg>
+            {{ project.tasks.count }} tasks
+          </span>
+          {% if project.deadline %}
+          <span>Due {{ project.deadline }}</span>
+          {% endif %}
+        </div>
+        <a href="{% url 'projects:detail' pk=project.pk %}"
+           class="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+          Open →
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="flex flex-col items-center justify-center py-24 text-center">
+    <div class="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mb-5">
+      <svg class="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      </svg>
+    </div>
+    <h3 class="text-xl font-semibold text-white mb-2">No projects yet</h3>
+    <p class="text-gray-400 text-sm mb-6">Get started by creating your first project.</p>
+    {% if user_role == 'admin' or user.is_superuser %}
+    <a href="{% url 'projects:create' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-lg transition-all">
+      Create Project
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Manage Members – {{ project.name }} – TaskFlow{% endblock %}
+{% block page_title %}Manage Members{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6 animate-fade-in">
+
+  <!-- Add Member -->
+  <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+    <h2 class="text-lg font-semibold text-white mb-4">Add Member to {{ project.name }}</h2>
+    <form method="post" id="add-member-form" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add" />
+      <div class="flex gap-3 flex-wrap">
+        <div class="flex-1 min-w-48">
+          <label class="block text-sm font-medium text-gray-300 mb-1.5">Email Address</label>
+          {{ form.email }}
+          {% if form.email.errors %}
+          <p class="mt-1 text-xs text-red-400">{{ form.email.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+        <div class="w-36">
+          <label class="block text-sm font-medium text-gray-300 mb-1.5">Role</label>
+          {{ form.role }}
+        </div>
+        <div class="flex items-end">
+          <button type="submit" id="btn-add-member"
+                  class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-all h-[42px]">
+            Add Member
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Current Members -->
+  <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
+      <h2 class="font-semibold text-white">Current Members</h2>
+      <span class="badge bg-gray-700 text-gray-300">{{ members.count }}</span>
+    </div>
+    <div class="divide-y divide-gray-700">
+      {% for m in members %}
+      <div class="flex items-center gap-4 px-6 py-4">
+        <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold">
+          {{ m.user.username|first|upper }}
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-white">{{ m.user.get_full_name|default:m.user.username }}</p>
+          <p class="text-xs text-gray-400">{{ m.user.email }}</p>
+        </div>
+        <span class="badge {% if m.role == 'admin' %}bg-indigo-900 text-indigo-300{% else %}bg-gray-700 text-gray-400{% endif %}">
+          {{ m.role }}
+        </span>
+        <span class="text-xs text-gray-500">Joined {{ m.joined_at|date:"M d, Y" }}</span>
+        {% if m.user != request.user %}
+        <form method="post" id="remove-member-{{ m.user.pk }}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="remove" />
+          <input type="hidden" name="user_id" value="{{ m.user.pk }}" />
+          <button type="submit"
+                  class="text-red-400 hover:text-red-300 text-xs font-medium transition-colors"
+                  onclick="return confirm('Remove {{ m.user.username }} from project?')">
+            Remove
+          </button>
+        </form>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p class="px-6 py-8 text-sm text-gray-500 text-center">No members yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <a href="{% url 'projects:detail' pk=project.pk %}" class="inline-flex text-sm text-indigo-400 hover:text-indigo-300">
+    ← Back to Project
+  </a>
+</div>
+{% endblock %}
