@@ -4,9 +4,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
+from django.http import HttpResponse
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Health check for Railway deployment
+    path('health/', lambda request: HttpResponse('OK', status=200), name='health'),
 
     # Root redirect to dashboard
     path('', lambda request: redirect('dashboard:index'), name='root'),

@@ -2,18 +2,21 @@
 from .base import *
 import dj_database_url
 from decouple import config
+import pymysql
+
+# Allow PyMySQL to be used as the MySQL client
+pymysql.install_as_MySQLdb()
 
 DEBUG = False
 
 SECRET_KEY = config('SECRET_KEY')
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=config('DATABASE_URL'),
+        default=config('DATABASE_URL', default=''),
         conn_max_age=600,
-        ssl_require=True,
     )
 }
 
