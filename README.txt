@@ -66,7 +66,7 @@ Member 2:
 LIVE URL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-https://your-app.railway.app  (placeholder — update after deployment)
+https://web-production-e6974.up.railway.app/ 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 API ENDPOINTS SUMMARY
